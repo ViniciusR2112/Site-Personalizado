@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechCorp Mobile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- ESTILOS GERAIS & RESET --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- BARRA DE NAVEGAÇÃO --- */
+        .navbar {
+            background-color: #1a252f;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .brand {
+            font-weight: bold;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.4rem;
+            cursor: pointer;
+        }
+
+        .nav-links {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: #1a252f;
+            display: none;
+            flex-direction: column;
+            border-top: 1px solid #34495e;
+        }
+
+        .nav-links.active {
+            display: flex;
+        }
+
+        .nav-links a {
+            color: #fff;
+            padding: 15px 20px;
+            text-decoration: none;
+            border-bottom: 1px solid #2c3e50;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background-color: #34495e;
+        }
+
+        /* --- GERENCIAMENTO DE PÁGINAS (SPA) --- */
+        .page {
+            display: none;
+            padding: 20px;
+            flex: 1;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+            font-size: 1.4rem;
+        }
+
+        /* --- COMPONENTE: CARROSSEL --- */
+        .carousel-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            background: #fff;
+        }
+
+        .carousel-track {
+            display: flex;
+            transition: transform 0.4s ease-in-out;
+        }
+
+        .carousel-item {
+            min-width: 100%;
+            position: relative;
+        }
+
+        .carousel-item img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .carousel-caption {
+            position: absolute;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            width: 100%;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            border-radius: 5px;
+        }
+
+        .carousel-btn.prev { left: 10px; }
+        .carousel-btn.next { right: 10px; }
+
+        /* --- PÁGINA 1: HOME --- */
+        .intro-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* --- PÁGINA 2: LOJA & CHECKOUT --- */
+        .product-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .checkout-form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .btn-pay {
+            width: 100%;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-pay:hover { background-color: #27ae60; }
+
+        /* --- PÁGINA 3: LOCALIZAÇÃO --- */
+        .map-container {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-top: 15px;
+        }
+
+        .map-container iframe {
+            width: 100%;
+            height: 250px;
+            border: 0;
+            display: block;
+        }
+
+        /* --- RODAPÉ --- */
+        footer {
+            background-color: #1a252f;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            margin-top: auto;
+            font-size: 0.9rem;
+            border-top: 3px solid #3498db;
+        }
+
+        .footer-info {
+            margin-bottom: 10px;
+        }
+
+        .footer-info p {
+            margin: 5px 0;
+        }
+
+        .footer-info i {
+            margin-right: 8px;
+            color: #3498db;
+        }
+
+        .social-icons a {
+            color: #fff;
+            font-size: 1.4rem;
+            margin: 0 10px;
+            transition: color 0.3s;
+        }
+
+        .social-icons a:hover {
+            color: #3498db;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="brand"><i class="fa-solid fa-code-branch"></i> TechCorp</div>
+        <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+        <div class="nav-links" id="navLinks">
+            <a href="#" onclick="navigateTo('home')">Início</a>
+            <a href="#" onclick="navigateTo('produtos')">Comprar</a>
+            <a href="#" onclick="navigateTo('contato')">Localização</a>
+        </div>
+    </nav>
+
+    <section id="home" class="page active">
+        <h2>Nossa Sede</h2>
+        <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80" alt="Prédio da Empresa" class="intro-img">
+        
+        <h2>Soluções Tecnológicas</h2>
+        <div class="carousel-container" id="carousel1">
+            <div class="carousel-track" id="track1">
+                <div class="carousel-item">
+                    <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80" alt="Cloud Computing">
+                    <div class="carousel-caption">Infraestrutura em Nuvem (Cloud AWS/Azure)</div>
+                </div>
+                <div class="carousel-item">
+                    <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=600&q=80" alt="Desenvolvimento Web">
+                    <div class="carousel-caption">Sistemas e Apps Customizados</div>
+                </div>
+                <div class="carousel-item">
+                    <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=600&q=80" alt="Segurança">
+                    <div class="carousel-caption">Consultoria em Cibersegurança & LGPD</div>
+                </div>
+            </div>
+            <button class="carousel-btn prev" onclick="moveCarousel('1', -1)">&#10094;</button>
+            <button class="carousel-btn next" onclick="moveCarousel('1', 1)">&#10095;</button>
+        </div>
+    </section>
+
+    <section id="produtos" class="page">
+        <h2>Carrinho de Compras</h2>
+        
+        <div class="product-card">
+            <div>
+                <h3>Notebook Enterprise Pro</h3>
+                <p style="color: #7f8c8d; font-size: 0.9rem;">Pacote corporativo + Suporte 24/7</p>
+                <strong style="color: #e74c3c; font-size: 1.1rem;">R$ 4.500,00</strong>
+            </div>
+            <div style="text-align: right;">
+                <span style="background: #3498db; color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.8rem;">1 un</span>
+            </div>
+        </div>
+
+        <div class="checkout-form">
+            <h3>Opções de Pagamento</h3>
+            <br>
+            <div class="form-group">
+                <label for="payment-method">Forma de Pagamento</label>
+                <select id="payment-method" onchange="toggleInstallments()">
+                    <option value="credit">Cartão de Crédito</option>
+                    <option value="debit">Cartão de Débito</option>
+                    <option value="pix">Pix (5% de Desconto)</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="installments-group">
+                <label for="installments">Quantidade de Parcelas</label>
+                <select id="installments">
+                    <option value="1">1x de R$ 4.500,00 (Sem Juros)</option>
+                    <option value="2">2x de R$ 2.250,00 (Sem Juros)</option>
+                    <option value="3">3x de R$ 1.500,00 (Sem Juros)</option>
+                    <option value="6">6x de R$ 750,00 (Sem Juros)</option>
+                    <option value="10">10x de R$ 450,00 (Sem Juros)</option>
+                </select>
+            </div>
+
+            <button class="btn-pay" onclick="processPayment()">Finalizar Compra</button>
+        </div>
+    </section>
+
+    <section id="contato" class="page">
+        <h2>Nossas Instalações</h2>
+        
+        <div class="carousel-container" id="carousel2">
+            <div class="carousel-track" id="track2">
+                <div class="carousel-item">
+                    <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=600&q=80" alt="Escritório Interno">
+                    <div class="carousel-caption">Sede Principal - São Paulo / SP</div>
+                </div>
+                <div class="carousel-item">
+                    <img src="https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=600&q=80" alt="Sala de Reuniões">
+                    <div class="carousel-caption">Filial Centro de Desenvolvimento</div>
+                </div>
+            </div>
+            <button class="carousel-btn prev" onclick="moveCarousel('2', -1)">&#10094;</button>
+            <button class="carousel-btn next" onclick="moveCarousel('2', 1)">&#10095;</button>
+        </div>
+
+        <h2>Onde Estamos</h2>
+        <div class="map-container">
+            <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3657.4074259468453!2d-46.6343513!3d-23.5358054!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94ce588523cbbfff%3A0x2db48e7da29d9124!2sEstac%C3%A3o%20da%20Luz!5e0!3m2!1spt-BR!2sbr!4v1700000000000!5m2!1spt-BR!2sbr" 
+                allowfullscreen="" 
+                loading="lazy" 
+                referrerpolicy="no-referrer-when-downgrade">
+            </iframe >
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-info">
+            <p><i class="fas fa-phone"></i> (11) 4004-0000</p>
+            <p><i class="fas fa-envelope"></i> contato@techcorp.com.br</p>
+        </div>
+        <div class="social-icons">
+            <a href="#" target="_blank"><i class="fab fa-linkedin"></i></a>
+            <a href="#" target="_blank"><i class="fab fa-github"></i></a>
+            <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+        </div>
+        <p style="font-size: 0.7rem; margin-top: 15px; color: #7f8c8d;">&copy; 2026 TechCorp. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        // Menu Hamburguer Mobile
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.getElementById('navLinks');
+
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+
+        // Navegação entre seções (SPA)
+        function navigateTo(pageId) {
+            // Esconde todas as páginas
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            // Mostra a página selecionada
+            document.getElementById(pageId).classList.add('active');
+            // Fecha o menu após o clique
+            navLinks.classList.remove('active');
+            // Rola para o topo automaticamente
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Lógica de Controle dos Carrosséis (Suporta múltiplos independentes)
+        const carouselStates = { '1': 0, '2': 0 };
+
+        function moveCarousel(id, direction) {
+            const track = document.getElementById(`track${id}`);
+            const items = track.querySelectorAll('.carousel-item');
+            const totalItems = items.length;
+            
+            carouselStates[id] += direction;
+
+            if (carouselStates[id] < 0) {
+                carouselStates[id] = totalItems - 1;
+            } else if (carouselStates[id] >= totalItems) {
+                carouselStates[id] = 0;
+            }
+
+            const amountToMove = carouselStates[id] * -100;
+            track.style.transform = `translateX(${amountToMove}%)`;
+        }
+
+        // Esconde as parcelas se for Pix ou Débito
+        function toggleInstallments() {
+            const method = document.getElementById('payment-method').value;
+            const installmentsGroup = document.getElementById('installments-group');
+            
+            if (method === 'credit') {
+                installmentsGroup.style.display = 'block';
+            } else {
+                installmentsGroup.style.display = 'none';
+            }
+        }
+
+        // Simulação de finalização de compra
+        function processPayment() {
+            const method = document.getElementById('payment-method').value;
+            if(method === 'pix') {
+                alert('Chave PIX Gerada com sucesso! Copie o código para pagar com 5% de desconto.');
+            } else {
+                alert('Pagamento processado com sucesso! Verifique seu e-mail.');
+            }
+        }
+    </script>
+</body>
+</html>
